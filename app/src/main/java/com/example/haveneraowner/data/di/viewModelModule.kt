@@ -44,7 +44,8 @@ val viewModelModule = module {
             postWithdrawAmountUseCase = get(),
             getProfileUseCase = get(),
             updateProfileUseCase = get(),
-            getCategoryListUseCase = get()
+            getCategoryListUseCase = get(),
+            getFacilityListUseCase = get()
 
 
 

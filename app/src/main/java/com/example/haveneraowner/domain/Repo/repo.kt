@@ -26,6 +26,7 @@ import com.example.haveneraowner.data.models.response.ChangePasswordResponse
 import com.example.haveneraowner.data.models.response.CreateOwnerServiceResponse
 import com.example.haveneraowner.data.models.response.DashboardOverview
 import com.example.haveneraowner.data.models.response.DeleteOwnerServiceResponse
+import com.example.haveneraowner.data.models.response.FacilityResponse
 import com.example.haveneraowner.data.models.response.ForgetPassOtpVerifyResponse
 import com.example.haveneraowner.data.models.response.ForgetPasswordResponse
 import com.example.haveneraowner.data.models.response.GetProfileResponse
@@ -88,6 +89,8 @@ interface Repo {
     suspend fun getProfile(): Flow<Results<Response<GetProfileResponse>>>
     suspend fun updateProfile(request: UpdateProfileRequest): Flow<Results<Response<UpdateProfileResponse>>>
     suspend fun getCategoryList(): Flow<Results<Response<CategoryResponse>>>
+    suspend fun getFacilityList(): Flow<Results<Response<FacilityResponse>>>
+
 
 
 

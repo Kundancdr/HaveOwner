@@ -29,6 +29,7 @@ import com.example.haveneraowner.data.models.response.ChangePasswordResponse
 import com.example.haveneraowner.data.models.response.CreateOwnerServiceResponse
 import com.example.haveneraowner.data.models.response.DashboardOverview
 import com.example.haveneraowner.data.models.response.DeleteOwnerServiceResponse
+import com.example.haveneraowner.data.models.response.FacilityResponse
 import com.example.haveneraowner.data.models.response.ForgetPassOtpVerifyResponse
 import com.example.haveneraowner.data.models.response.ForgetPasswordResponse
 import com.example.haveneraowner.data.models.response.GetProfileResponse
@@ -702,6 +703,20 @@ class RepoImpl(
         emit(Results.Loading)
         try {
             val response = apiServices.getCategoryList()
+            if (response.isSuccessful) {
+                emit(Results.Success(response))
+            } else {
+                emit(Results.Error(response.message()))
+            }
+        } catch (e: Exception) {
+            emit(Results.Error(e.localizedMessage ?: "Unexpected Error"))
+        }
+    }
+
+    override suspend fun getFacilityList(): Flow<Results<Response<FacilityResponse>>> = flow {
+        emit(Results.Loading)
+        try {
+            val response = apiServices.getFacilityList()
             if (response.isSuccessful) {
                 emit(Results.Success(response))
             } else {

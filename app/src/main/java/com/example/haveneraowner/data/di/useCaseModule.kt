@@ -8,6 +8,7 @@ import com.example.haveneraowner.domain.useCase.DeleteOwnerServiceUseCase
 import com.example.haveneraowner.domain.useCase.ForgetPasswordOtpVerifyUseCase
 import com.example.haveneraowner.domain.useCase.ForgetPasswordUseCase
 import com.example.haveneraowner.domain.useCase.GetCategoryListUseCase
+import com.example.haveneraowner.domain.useCase.GetFacilityListUseCase
 import com.example.haveneraowner.domain.useCase.GetOwnerBookingsUseCase
 import com.example.haveneraowner.domain.useCase.GetOwnerRoomByIdUseCase
 import com.example.haveneraowner.domain.useCase.GetOwnerRoomsUseCase
@@ -34,6 +35,7 @@ import com.example.haveneraowner.domain.useCase.getOwnerReviewUseCase
 import com.example.haveneraowner.domain.useCase.getRecentBookingsUseCase
 import com.example.haveneraowner.domain.useCase.getRevenueTrendsUseCase
 import org.koin.dsl.module
+import kotlin.math.sin
 
 val useCaseModule = module {
 
@@ -94,6 +96,7 @@ val useCaseModule = module {
     single { GetProfileUseCase(get()) }
     single { UpdateProfileUseCase(get()) }
     single { GetCategoryListUseCase(get()) }
+    single { GetFacilityListUseCase(get()) }
 
 
 

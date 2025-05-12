@@ -28,6 +28,7 @@ import com.example.haveneraowner.data.models.response.ChangePasswordResponse
 import com.example.haveneraowner.data.models.response.CreateOwnerServiceResponse
 import com.example.haveneraowner.data.models.response.DashboardOverview
 import com.example.haveneraowner.data.models.response.DeleteOwnerServiceResponse
+import com.example.haveneraowner.data.models.response.FacilityResponse
 import com.example.haveneraowner.data.models.response.ForgetPassOtpVerifyResponse
 import com.example.haveneraowner.data.models.response.ForgetPasswordResponse
 import com.example.haveneraowner.data.models.response.GetAllServices
@@ -245,4 +246,7 @@ interface ApiServices {
 
     @GET("categories/list/")
     suspend fun getCategoryList(): Response<CategoryResponse>
+
+    @GET("facilities/list/")
+    suspend fun getFacilityList(): Response<FacilityResponse>
 }

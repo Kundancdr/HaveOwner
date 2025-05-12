@@ -71,13 +71,24 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberImagePainter
 import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.icons.filled.Collections
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Image
 import com.example.haveneraowner.data.models.Categorys
 import com.example.haveneraowner.data.models.CreateOwnerRoomRequest
 import com.example.haveneraowner.data.models.Rooms
 import com.example.haveneraowner.data.models.request.CreateOwnerServiceRequest
 import com.example.haveneraowner.presentation.viewModels.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AddHotelRoomScreen(
@@ -241,8 +252,18 @@ fun AddHotelRoomScreen(
 fun RoomDialog(
     //room: Rooms?,
     onDismiss: () -> Unit ={},
-    onSave: (CreateOwnerRoomRequest) -> Unit ={}
+    onSave: (CreateOwnerRoomRequest) -> Unit ={},
+    viewModel: AuthViewModel = koinViewModel()
 ) {
+
+    val Categorys by viewModel.categoryState.collectAsState()
+    val Services by viewModel.ownerServiceState.collectAsState()
+    val Facility by viewModel.facilityState.collectAsState()
+    val catlist = Categorys.success?.body()?.name
+    val serviceList = Services.success?.body()
+    val facilityList = Facility.success?.body()
+    Log.d("serviceList", "RoomDialog:$facilityList")
+
     var category by remember { mutableStateOf("") }
     var roomName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -310,7 +331,7 @@ fun RoomDialog(
                 OutlinedTextField(
                     value = rules.joinToString("\n-"),
                     onValueChange = { rules = it.split("\n-") },
-                    label = { Text("Rules (start each line with '-')") },
+                    label = { Text("Rules") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -402,8 +423,21 @@ fun RoomDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+
+
                 Spacer(modifier = Modifier.height(6.dp))
                 // Available From
+
+                val calendar = Calendar.getInstance().apply {
+                    timeInMillis = availableFrom
+                }
+
+                val formattedDate = remember(availableFrom) {
+                    val date = Date(availableFrom)
+                    val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                    formatter.format(date)
+                }
+
                 val datePickerDialog = DatePickerDialog(
                     context,
                     { _, year, month, day ->
@@ -416,8 +450,21 @@ fun RoomDialog(
                     Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
                 )
 
-                Button(onClick = { datePickerDialog.show() }) {
-                    Text("Select Available Date")
+                OutlinedButton(
+                    onClick = { datePickerDialog.show() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color.Gray),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Select Date",
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text(text = formattedDate)
                 }
 
                 Spacer(Modifier.height(10.dp))
@@ -434,53 +481,79 @@ fun RoomDialog(
                     additionalImages = uris
                 }
 
-                Button(
-                    onClick = { launcherSingle.launch("image/*") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Select Main Image")
-                }
-
-                mainImage?.let { imageUri ->
-                    Image(
-                        painter = rememberImagePainter(imageUri),
-                        contentDescription = "Main Image",
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { launcherSingle.launch("image/*") },
                         modifier = Modifier
-                            .size(150.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .border(2.dp, Color.Gray, RoundedCornerShape(12.dp))
-                            .padding(8.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, Color.Gray),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "Pick Image",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text(text = "Select Main Image")
+                    }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                // Multiple Images Picker
-                Button(
-                    onClick = { launcherMultiple.launch("image/*") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Select Additional Images")
+                    mainImage?.let { imageUri ->
+                        Image(
+                            painter = rememberImagePainter(imageUri),
+                            contentDescription = "Main Image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(2.dp, Color.Gray, RoundedCornerShape(12.dp))
+                                .padding(4.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (additionalImages.isNotEmpty()) {
-                    Box(  // ✅ Wrap LazyVerticalGrid in a Box to avoid infinite constraints
-                        modifier = Modifier.fillMaxWidth()
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { launcherMultiple.launch("image/*") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, Color.Gray),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Collections, // Better suited for multiple images
+                            contentDescription = "Pick Images",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Select Additional Images")
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (additionalImages.isNotEmpty()) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(3),
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 300.dp), // Fixes crash from infinite height
+                            contentPadding = PaddingValues(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(additionalImages) { imageUri ->
                                 Image(
                                     painter = rememberImagePainter(imageUri),
                                     contentDescription = "Additional Image",
                                     modifier = Modifier
-                                        .size(100.dp)
+                                        .aspectRatio(1f)
                                         .clip(RoundedCornerShape(8.dp))
                                         .border(2.dp, Color.Gray, RoundedCornerShape(8.dp)),
                                     contentScale = ContentScale.Crop
@@ -572,7 +645,7 @@ fun RoomDialog(
                             category = Categorys(id = 1, name = ""),
                             room_name = roomName,
                             description = description,
-                            rules = TODO(),
+                            rules = rules.toString(),
                             price_per_night = pricePerNight,
                             price_not_per_night = priceNotPerNight,
                             tax = taxPercentage,
@@ -607,84 +680,7 @@ fun RoomDialog(
     }
 }
 
-@Composable
-fun ImagePickerScreen() {
-     var mainImage by remember { mutableStateOf<Uri?>(null) }
-     var additionalImages by remember { mutableStateOf<List<Uri>>(emptyList()) }  // ✅ Use List<Uri>
 
-    val launcherSingle = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { mainImage = it }
-    }
-
-    val launcherMultiple = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris: List<Uri> ->
-        additionalImages = uris  // ✅ No type mismatch now
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Single Image Picker
-        Button(
-            onClick = { launcherSingle.launch("image/*") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Select Main Image")
-        }
-
-        mainImage?.let { imageUri ->
-            Image(
-                painter = rememberImagePainter(imageUri),
-                contentDescription = "Main Image",
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(2.dp, Color.Gray, RoundedCornerShape(12.dp))
-                    .padding(8.dp),
-                contentScale = ContentScale.Crop
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Multiple Images Picker
-        Button(
-            onClick = { launcherMultiple.launch("image/*") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Select Additional Images")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (additionalImages.isNotEmpty()) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(8.dp)
-            ) {
-                items(additionalImages) { imageUri ->
-                    Image(
-                        painter = rememberImagePainter(imageUri),
-                        contentDescription = "Additional Image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(2.dp, Color.Gray, RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-        }
-    }
-}
 
 
 
@@ -818,6 +814,10 @@ private fun EmptyState() {
         )
     }
 }
+
+
+
+
 //
 //import android.app.DatePickerDialog
 //import android.widget.Toast

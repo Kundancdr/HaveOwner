@@ -30,6 +30,7 @@ import com.example.haveneraowner.data.models.response.ChangePasswordResponse
 import com.example.haveneraowner.data.models.response.CreateOwnerServiceResponse
 import com.example.haveneraowner.data.models.response.DashboardOverview
 import com.example.haveneraowner.data.models.response.DeleteOwnerServiceResponse
+import com.example.haveneraowner.data.models.response.FacilityResponse
 import com.example.haveneraowner.data.models.response.ForgetPassOtpVerifyResponse
 import com.example.haveneraowner.data.models.response.ForgetPasswordResponse
 import com.example.haveneraowner.data.models.response.GetProfileResponse
@@ -56,6 +57,7 @@ import com.example.haveneraowner.domain.useCase.DeleteOwnerServiceUseCase
 import com.example.haveneraowner.domain.useCase.ForgetPasswordOtpVerifyUseCase
 import com.example.haveneraowner.domain.useCase.ForgetPasswordUseCase
 import com.example.haveneraowner.domain.useCase.GetCategoryListUseCase
+import com.example.haveneraowner.domain.useCase.GetFacilityListUseCase
 import com.example.haveneraowner.domain.useCase.GetOwnerBookingsUseCase
 import com.example.haveneraowner.domain.useCase.GetOwnerRoomByIdUseCase
 import com.example.haveneraowner.domain.useCase.GetOwnerRoomsUseCase
@@ -122,7 +124,8 @@ class AuthViewModel(
     private val postWithdrawAmountUseCase: PostWithdrawAmountUseCase,
     private val getProfileUseCase: GetProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
-    private val getCategoryListUseCase: GetCategoryListUseCase
+    private val getCategoryListUseCase: GetCategoryListUseCase,
+    private val getFacilityListUseCase: GetFacilityListUseCase
 
 
 ) : ViewModel() {
@@ -235,6 +238,11 @@ class AuthViewModel(
     private val _categoryState = MutableStateFlow(CategoryState())
     val categoryState = _categoryState.asStateFlow()
 
+    private val _facilityState = MutableStateFlow(FacilityState())
+    val facilityState = _facilityState.asStateFlow()
+
+
+
 
 
 
@@ -273,6 +281,23 @@ class AuthViewModel(
                     is Results.Loading -> {
                         _updateProfileState.value = UpdateProfileState(isLoading = true)
                     }
+                }
+            }
+        }
+    }
+
+    init {
+        getFacilityList()
+    }
+
+    fun getFacilityList() {
+        _facilityState.value = FacilityState(isLoading = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            getFacilityListUseCase.execute().collect { result ->
+                _facilityState.value = when (result) {
+                    is Results.Success -> FacilityState(success = result.data)
+                    is Results.Error -> FacilityState(error = result.message)
+                    is Results.Loading -> FacilityState(isLoading = true)
                 }
             }
         }
@@ -1106,5 +1131,11 @@ data class UpdateProfileState(
 data class CategoryState(
     val isLoading: Boolean = false,
     val success: Response<CategoryResponse>? = null,
+    val error: String? = null
+)
+
+data class FacilityState(
+    val isLoading: Boolean = false,
+    val success: Response<FacilityResponse>? = null,
     val error: String? = null
 )
