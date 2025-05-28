@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
 class GetFacilityListUseCase(private val repo: Repo) {
-    suspend fun execute(): Flow<Results<Response<FacilityResponse>>> {
+    suspend fun execute(): Flow<Results<Response<List<FacilityResponse>>>> {
         return repo.getFacilityList()
     }
 }

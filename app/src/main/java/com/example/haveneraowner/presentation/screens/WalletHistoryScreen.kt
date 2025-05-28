@@ -40,7 +40,7 @@ fun WalletHistoryScreen(
     viewModel: AuthViewModel = koinViewModel()
 ) {
     val walletHistory by viewModel.withdrawalHistoryState.collectAsState()
-    val history = walletHistory.success?.body()
+    val history = walletHistory.success ?: emptyList()
 
     Log.d("bhhgvn", "WalletHistoryScreen: $history ")
 

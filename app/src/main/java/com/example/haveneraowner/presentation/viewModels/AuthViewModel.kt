@@ -41,7 +41,6 @@ import com.example.haveneraowner.data.models.response.OwnerServiceResponse
 import com.example.haveneraowner.data.models.response.RecentBooking
 import com.example.haveneraowner.data.models.response.RefreshTokenResponse
 import com.example.haveneraowner.data.models.response.Review
-import com.example.haveneraowner.data.models.response.ReviewResponse
 import com.example.haveneraowner.data.models.response.SigninResponseModel
 import com.example.haveneraowner.data.models.response.SignupResponseModel
 import com.example.haveneraowner.data.models.response.UpdateOwnerServiceResponse
@@ -286,17 +285,21 @@ class AuthViewModel(
         }
     }
 
-    init {
-        getFacilityList()
-    }
+
 
     fun getFacilityList() {
         _facilityState.value = FacilityState(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
             getFacilityListUseCase.execute().collect { result ->
                 _facilityState.value = when (result) {
-                    is Results.Success -> FacilityState(success = result.data)
-                    is Results.Error -> FacilityState(error = result.message)
+                    is Results.Success -> {
+                        Log.d("getFacility", "Success: ${result.data.body()}")
+                        FacilityState(success = result.data)
+                    }
+                    is Results.Error -> {
+                        Log.d("getFacility", "Success: ${result.message}")
+                        FacilityState(error = result.message)
+                    }
                     is Results.Loading -> FacilityState(isLoading = true)
                 }
             }
@@ -308,8 +311,14 @@ class AuthViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             getCategoryListUseCase.execute().collect { result ->
                 _categoryState.value = when (result) {
-                    is Results.Success -> CategoryState(success = result.data)
-                    is Results.Error -> CategoryState(error = result.message)
+                    is Results.Success -> {
+                        Log.d("getcat", "Success: ${result.data.body()}")
+                        CategoryState(success = result.data)
+                    }
+                    is Results.Error -> {
+                        Log.d("getcat", "Success: ${result.message}")
+                        CategoryState(error = result.message)
+                    }
                     is Results.Loading -> CategoryState(isLoading = true)
                 }
             }
@@ -342,7 +351,9 @@ class AuthViewModel(
         }
     }
 
-
+//init {
+//    getWithdrawalHistory()
+//}
 
     fun getWithdrawalHistory() {
         _withdrawalHistoryState.value = WithdrawalHistoryState(isLoading = true)
@@ -352,7 +363,7 @@ class AuthViewModel(
                     is Results.Success -> {
 
                         Log.d("getWallet", "Received result: $result")
-                        WithdrawalHistoryState(success = result.data)
+                        WithdrawalHistoryState(success = result.data.body())
                     }
                     is Results.Error ->{
 
@@ -614,7 +625,7 @@ fun getOwnerRooms() {
             getOwnerReviewUseCase.execute().collect { result ->
                 when (result) {
                     is Results.Success -> {
-                       Log.d("DEBUGS", "Success: ${result.data}")
+                       Log.d("DEBUGS", "Success: ${result.data.body()?.user}")
 
                         _ownerReviewState.value =
                             OwnerReviewState(success = result.data)
@@ -1107,7 +1118,7 @@ data class WalletState(
 
 data class WithdrawalHistoryState(
     val isLoading: Boolean = false,
-    val success: Response<WithdrawalHistoryResponse>? = null,
+    val success: List<WithdrawalHistoryResponse>? = null,
     val error: String? = null
 )
 
@@ -1130,12 +1141,12 @@ data class UpdateProfileState(
 
 data class CategoryState(
     val isLoading: Boolean = false,
-    val success: Response<CategoryResponse>? = null,
+    val success: Response<List<CategoryResponse>>? = null,
     val error: String? = null
 )
 
 data class FacilityState(
     val isLoading: Boolean = false,
-    val success: Response<FacilityResponse>? = null,
+    val success: Response<List<FacilityResponse>>? = null,
     val error: String? = null
 )

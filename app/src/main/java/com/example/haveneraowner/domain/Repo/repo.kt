@@ -83,13 +83,13 @@ interface Repo {
     suspend fun getOwnerRoomById(roomId: Int): Flow<Results<Response<OwnerRoomByIdResponse>>>
 
     suspend fun getWallet(): Flow<Results<Response<WalletResponse>>>
-    suspend fun getWithdrawalHistory(): Flow<Results<Response<WithdrawalHistoryResponse>>>
+    suspend fun getWithdrawalHistory(): Flow<Results<Response<List<WithdrawalHistoryResponse>>>>
     suspend fun postWithdrawAmount(request: WithdrawRequest): Flow<Results<Response<WithdrawResponse>>>
 
     suspend fun getProfile(): Flow<Results<Response<GetProfileResponse>>>
     suspend fun updateProfile(request: UpdateProfileRequest): Flow<Results<Response<UpdateProfileResponse>>>
-    suspend fun getCategoryList(): Flow<Results<Response<CategoryResponse>>>
-    suspend fun getFacilityList(): Flow<Results<Response<FacilityResponse>>>
+    suspend fun getCategoryList(): Flow<Results<Response<List<CategoryResponse>>>>
+    suspend fun getFacilityList(): Flow<Results<Response<List<FacilityResponse>>>>
 
 
 

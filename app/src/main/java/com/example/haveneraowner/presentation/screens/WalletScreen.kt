@@ -67,7 +67,7 @@ fun ProfileScreen(
     val walletState by viewModel.walletState.collectAsState()
     val wallet = walletState.success?.body()
     val walletHiss by viewModel.withdrawalHistoryState.collectAsState()
-    val history = walletHiss.success?.body()
+    //val history = walletHiss.success?.body()
 
 
     if (wallet != null) {

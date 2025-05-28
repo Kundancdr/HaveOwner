@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
 class GetWithdrawalHistoryUseCase(private val repo: Repo) {
-    suspend fun execute(): Flow<Results<Response<WithdrawalHistoryResponse>>> {
+    suspend fun execute(): Flow<Results<Response<List<WithdrawalHistoryResponse>>>> {
         return repo.getWithdrawalHistory()
     }
 }

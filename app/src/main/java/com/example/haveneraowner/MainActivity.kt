@@ -21,10 +21,16 @@ import com.example.haveneraowner.presentation.screens.Dashboard
 import com.example.haveneraowner.presentation.screens.ReviewScreen
 import com.example.haveneraowner.presentation.screens.WalletHistoryScreen
 import com.example.haveneraowner.ui.theme.HaveneraOwnerTheme
+import com.google.android.libraries.places.api.Places
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val apiKey = getString(R.string.maps_api_key)
+        if (!Places.isInitialized() && apiKey != null) {
+            Places.initialize(applicationContext, apiKey)
+        }
         enableEdgeToEdge()
         setContent {
             HaveneraOwnerTheme {

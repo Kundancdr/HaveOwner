@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
 class GetCategoryListUseCase(private val repo: Repo) {
-    suspend fun execute(): Flow<Results<Response<CategoryResponse>>> {
+    suspend fun execute(): Flow<Results<Response<List<CategoryResponse>>>> {
         return repo.getCategoryList()
     }
 }

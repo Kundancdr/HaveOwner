@@ -94,6 +94,14 @@ dependencies {
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
     // preferences
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    //location
+     implementation ("androidx.activity:activity-compose:1.8.0")
+    // Google Maps
+    implementation("com.google.maps.android:maps-compose:2.11.4")
+    // Places SDK
+    implementation("com.google.android.libraries.places:places:3.4.0")
+
+
     //Graph
     //implementation("com.github.tehras:charts:0.2.4")
     // RazorPay

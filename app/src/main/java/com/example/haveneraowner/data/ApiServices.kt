@@ -229,7 +229,7 @@ interface ApiServices {
 
     // ✅ Get Withdrawal History
     @GET("owner/withdrawal/history/")
-    suspend fun getWithdrawalHistory(): Response<WithdrawalHistoryResponse>
+    suspend fun getWithdrawalHistory(): Response<List<WithdrawalHistoryResponse>>
 
     // ✅ Post Withdraw Amount
     @POST("owner/withdrawal/history/")
@@ -245,8 +245,8 @@ interface ApiServices {
     suspend fun updateProfile(@Body updateProfileRequest: UpdateProfileRequest): Response<UpdateProfileResponse>
 
     @GET("categories/list/")
-    suspend fun getCategoryList(): Response<CategoryResponse>
+    suspend fun getCategoryList(): Response<List<CategoryResponse>>
 
     @GET("facilities/list/")
-    suspend fun getFacilityList(): Response<FacilityResponse>
+    suspend fun getFacilityList(): Response<List<FacilityResponse>>
 }

@@ -1,8 +1,13 @@
 package com.example.haveneraowner.presentation.screens
 
+import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,9 +17,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,15 +37,18 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
-import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Collections
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Visibility
@@ -70,20 +80,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberImagePainter
-import android.net.Uri
-import android.util.Log
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.icons.filled.Collections
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Image
-import com.example.haveneraowner.data.models.Categorys
 import com.example.haveneraowner.data.models.CreateOwnerRoomRequest
 import com.example.haveneraowner.data.models.Rooms
-import com.example.haveneraowner.data.models.request.CreateOwnerServiceRequest
 import com.example.haveneraowner.presentation.viewModels.AuthViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -192,33 +201,34 @@ fun AddHotelRoomScreen(
                         onSave = {result ->
                             viewModel.createOwnerRoom(
                                 CreateOwnerRoomRequest(
-                                    category = Categorys(id = 1, name = ""),
+                                    category = result.category,
+                                    room_for = result.room_for,
                                     room_name = result.room_name,
                                     description = result.description,
-                                    rules = result.rules,
+                                   // rules = result.rules,
                                     price_per_night = result.price_per_night,
                                     price_not_per_night = result.price_not_per_night,
                                     tax = result.tax,
-                                    room_type = result.room_type,
+                                  //  room_type = result.room_type,
                                     capacity = result.capacity,
                                     no_of_room = result.no_of_room,
                                     latitude = result.latitude,
                                     longitude = result.longitude,
-                                    near_by = result.near_by,
+                                  //  near_by = result.near_by,
                                     address = result.address,
-                                    address_line2 = result.address_line2,
+                                   // address_line2 = result.address_line2,
                                     city = result.city,
                                     state = result.state,
                                     postal_code = result.postal_code,
                                     country = result.country,
                                     available_from = result.available_from,
-                                    available_to = result.available_to,
+                                  //  available_to = result.available_to,
                                     facilities = result.facilities,
                                     services = result.services,
                                     main_image = result.main_image,
                                     additional_images = result.additional_images,
                                     status = result.status,
-                                    created_at = result.created_at,
+                                  //  created_at = result.created_at,
                                 )
                             )
                         }
@@ -256,25 +266,41 @@ fun RoomDialog(
     viewModel: AuthViewModel = koinViewModel()
 ) {
 
+    LaunchedEffect(Unit) {
+        viewModel.getFacilityList()
+        viewModel.getOwnerService()
+        viewModel.getCategoryList()
+    }
+
+    val contexts = LocalContext.current
+
     val Categorys by viewModel.categoryState.collectAsState()
     val Services by viewModel.ownerServiceState.collectAsState()
     val Facility by viewModel.facilityState.collectAsState()
-    val catlist = Categorys.success?.body()?.name
-    val serviceList = Services.success?.body()
+    val RoomFor by viewModel.facilityState.collectAsState()
+    val categoryList = Categorys.success?.body()
+    val serviceList = Services.success?.body()?.results
     val facilityList = Facility.success?.body()
-    Log.d("serviceList", "RoomDialog:$facilityList")
+    val roomsForList = Facility.success?.body()
 
-    var category by remember { mutableStateOf("") }
+    //Log.d("serviceList", "RoomFacility:$facilityList")
+    // Log.d("serviceList", "RoomCategory:$categoryList")
+    //Log.d("serviceList", "RoomService:$serviceList")
+
+    var selectedRoomForId by remember {  mutableStateOf(roomsForList?.firstOrNull()?.id ?: 0)}
+    var selectedCategoryId by remember {  mutableStateOf(categoryList?.firstOrNull()?.id ?: 0)}
     var roomName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var rules by remember { mutableStateOf(listOf<String>()) }
+    //var rules by remember { mutableStateOf(listOf<String>()) }
     var pricePerNight by remember { mutableStateOf(0.0) }
     var priceNotPerNight by remember { mutableStateOf(0.0) }
     var taxPercentage by remember { mutableStateOf(0.0) }
     var capacity by remember { mutableStateOf(0) }
     var numberOfRooms by remember { mutableStateOf(0) }
+    var Lattitude by remember { mutableStateOf(0.0) }
+    var Longitude by remember { mutableStateOf(0.0) }
     var fullAddress by remember { mutableStateOf("") }
-    var nearByAddress by remember { mutableStateOf("") }
+   // var nearByAddress by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var state by remember { mutableStateOf("") }
     var country by remember { mutableStateOf("") }
@@ -282,10 +308,11 @@ fun RoomDialog(
     var availableFrom by remember { mutableStateOf(System.currentTimeMillis()) }
     var mainImage by remember { mutableStateOf<Uri?>(null) }
     var additionalImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var facilities by remember { mutableStateOf<List<String>>(emptyList()) }
-    var services by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedFacilityIds by remember { mutableStateOf(listOf<Int>()) }
+    var selectedServicesIds by remember { mutableStateOf(listOf<Int>()) }
+
     var status by remember { mutableStateOf("Available") }
-    var searchLocation by remember { mutableStateOf("") }
+    //var searchLocation by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
@@ -299,16 +326,56 @@ fun RoomDialog(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                Text("Add Room", style = MaterialTheme.typography.labelMedium)
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Add Room",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.Red
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
 
+
+
                 // Category
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    label = { Text("Category") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Text("Category")
+                categoryList?.forEach { category ->
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedCategoryId == category.id,
+                            onClick = {
+                                selectedCategoryId = category.id
+                            }
+                        )
+                        Text(
+                            text = category.name
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Category
+                Text("RoomsFor")
+                roomsForList?.forEach { roomsfor ->
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedRoomForId == roomsfor.id,
+                            onClick = {
+                                selectedRoomForId = roomsfor.id
+                            }
+                        )
+                        Text(
+                            text = roomsfor.name
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(6.dp))
 
                 // Room Name
@@ -329,9 +396,17 @@ fun RoomDialog(
                 Spacer(modifier = Modifier.height(6.dp))
                 // Rules
                 OutlinedTextField(
-                    value = rules.joinToString("\n-"),
-                    onValueChange = { rules = it.split("\n-") },
-                    label = { Text("Rules") },
+                    value = Longitude.toString(),
+                    onValueChange = { Longitude = it.toDoubleOrNull() ?: 0.0 },
+                    label = { Text("Longitude") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+
+                OutlinedTextField(
+                    value = Lattitude.toString(),
+                    onValueChange = { Lattitude = it.toDoubleOrNull() ?: 0.0 },
+                    label = { Text("Lattitude") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -384,12 +459,12 @@ fun RoomDialog(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 // Nearby Address
-                OutlinedTextField(
-                    value = nearByAddress,
-                    onValueChange = { nearByAddress = it },
-                    label = { Text("Nearby Address") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+//                OutlinedTextField(
+//                    value = nearByAddress,
+//                    onValueChange = { nearByAddress = it },
+//                    label = { Text("Nearby Address") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
                 Spacer(modifier = Modifier.height(6.dp))
                 // City
                 OutlinedTextField(
@@ -420,8 +495,14 @@ fun RoomDialog(
                     value = pinCode,
                     onValueChange = { pinCode = it },
                     label = { Text("Pin Code") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(8.dp),
+                  //  border = BorderStroke(1.dp, Color.Gray),
+                  //  colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
                 )
+
 
 
 
@@ -569,18 +650,18 @@ fun RoomDialog(
                 Text("facility")
                 // Facilities
                 // Assuming you have a list of facilities to choose from
-                val facilitiesList = listOf("Wi-Fi", "Pool", "Gym", "Parking")
-                facilitiesList.forEach { facility ->
+                // val facilitiesList = listOf("Wi-Fi", "Pool", "Gym", "Parking")
+                facilityList?.forEach { facility ->
                     Row (
                         verticalAlignment = Alignment.CenterVertically
                     ){
                         Checkbox(
-                            checked = facilities.contains(facility),
+                            checked = selectedFacilityIds.contains(facility.id),
                             onCheckedChange = { checked ->
-                                facilities = if (checked) facilities + facility else facilities - facility
+                                selectedFacilityIds = if (checked) selectedFacilityIds + facility.id else selectedFacilityIds - facility.id
                             }
                         )
-                        Text(facility)
+                        Text(text = facility.name)
                     }
                 }
 
@@ -589,18 +670,18 @@ fun RoomDialog(
                 Text("Services")
                 // Services
                 // Assuming you have a list of services to choose from
-                val servicesList = listOf("Room Service", "Laundry", "Breakfast")
-                servicesList.forEach { service ->
+                // val servicesList = listOf("Room Service", "Laundry", "Breakfast")
+                serviceList?.forEach { service ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = services.contains(service),
+                            checked = selectedServicesIds.contains(service.id),
                             onCheckedChange = { checked ->
-                                services = if (checked) services + service else services - service
+                                selectedServicesIds = if (checked) selectedServicesIds + service.id else selectedServicesIds - service.id
                             }
                         )
-                        Text(service)
+                        Text(text = service.name)
                     }
                 }
 
@@ -623,12 +704,18 @@ fun RoomDialog(
 
                 Spacer(modifier = Modifier.height(6.dp))
                 // Search Location
-                OutlinedTextField(
-                    value = searchLocation,
-                    onValueChange = { searchLocation = it },
-                    label = { Text("Search Location") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+//                OutlinedTextField(
+//                    value = searchLocation,
+//                    onValueChange = { searchLocation = it },
+//                    label = { Text("Search Location") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+
+                LocationPickerScreen()
+//                LocationPickerScreen { latLng, address ->
+//                    //selectedLatLng = latLng
+//                    //selectedAddress = address
+//                }
 
                 Spacer(modifier = Modifier.height(16.dp))
                 // Save and Cancel Buttons
@@ -642,33 +729,28 @@ fun RoomDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = {
                         val roomss = CreateOwnerRoomRequest(
-                            category = Categorys(id = 1, name = ""),
+                            category = selectedCategoryId,
+                            room_for = selectedRoomForId,
                             room_name = roomName,
                             description = description,
-                            rules = rules.toString(),
                             price_per_night = pricePerNight,
                             price_not_per_night = priceNotPerNight,
                             tax = taxPercentage,
-                            room_type = TODO(),
                             capacity = capacity,
                             no_of_room = numberOfRooms,
-                            latitude = TODO(),
-                            longitude = TODO(),
-                            near_by = nearByAddress,
-                            address = nearByAddress,
-                            address_line2 = fullAddress,
+                            latitude = Lattitude,
+                            longitude = Lattitude,
+                            address = fullAddress,
                             city = city,
                             state = state,
-                            postal_code = TODO(),
+                            postal_code = pinCode,
                             country =country,
                             available_from = availableFrom.toString(),
-                            available_to = TODO(),
-                            facilities = TODO(),
-                            services = TODO(),
-                            main_image = TODO(),
-                            additional_images = TODO(),
-                            status = status,
-                            created_at = TODO(),
+                            facilities = selectedFacilityIds,
+                            services = selectedServicesIds,
+                            main_image = mainImage.toString(),
+                            additional_images =  additionalImages.map { it.toString() },
+                            status = status
                         )
                         onSave(roomss)
                     }) {
@@ -681,6 +763,138 @@ fun RoomDialog(
 }
 
 
+//@Composable
+//fun SearchLocationScreen(
+//    context: Context = LocalContext.current,
+//    onLocationSelected: (LatLng) -> Unit
+//) {
+//    var selectedPlace by remember { mutableStateOf<Place?>(null) }
+//
+//    val launcher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.StartActivityForResult()
+//    ) { result ->
+//        if (result.resultCode == Activity.RESULT_OK) {
+//            result.data?.let { data ->
+//                val place = Autocomplete.getPlaceFromIntent(data)
+//                selectedPlace = place
+//                place.latLng?.let {
+//                    // 🚀 Send coordinates to server
+//                    //sendCoordinatesToServer(it)
+//                    onLocationSelected(it)
+//                }
+//            }
+//        }
+//    }
+//
+//    Column(modifier = Modifier.padding(16.dp)) {
+//        Button(
+//            onClick = {
+//                val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+//                val intent = Autocomplete.IntentBuilder(
+//                    AutocompleteActivityMode.FULLSCREEN, fields
+//                ).build(context)
+//                launcher.launch(intent)
+//            },
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Text(text = "Search Location")
+//        }
+//
+//        Spacer(modifier = Modifier.height(24.dp))
+//
+//        selectedPlace?.let { place ->
+//            Text(text = "📍 Place: ${place.name}", style = MaterialTheme.typography.titleMedium)
+//            place.latLng?.let {
+//                Text(text = "🌐 Latitude: ${it.latitude}")
+//                Text(text = "🌐 Longitude: ${it.longitude}")
+//            }
+//        }
+//    }
+//}
+
+
+@Composable
+fun LocationPickerScreen(
+    //onLocationSelected: (LatLng, Any?) -> Unit
+) {
+
+    val context = LocalContext.current
+    var selectedLatLng by remember { mutableStateOf<LatLng?>(null) }
+    val cameraPositionState = rememberCameraPositionState()
+
+    //val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val place = Autocomplete.getPlaceFromIntent(result.data!!)
+            selectedLatLng = place.latLng
+        } else if (result.resultCode == AutocompleteActivity.RESULT_ERROR) {
+            val status = Autocomplete.getStatusFromIntent(result.data!!)
+            Log.e("PlacesError", status.statusMessage ?: "Unknown error")
+        }
+    }
+
+
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Button(
+            onClick = {
+                val fields = listOf(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.LAT_LNG,
+                    Place.Field.ADDRESS
+                )
+
+                val intent = Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.OVERLAY, fields
+                ).build(context)
+                launcher.launch(intent)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Search Location")
+        }
+
+        GoogleMap(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            cameraPositionState = cameraPositionState,
+            onMapLoaded = {
+                selectedLatLng?.let {
+                    cameraPositionState.move(
+                        CameraUpdateFactory.newLatLngZoom(it, 15f)
+                    )
+                }
+            }
+        ) {
+            selectedLatLng?.let {
+                Marker(
+                    state = MarkerState(position = it),
+                    title = "Selected Location"
+                )
+            }
+        }
+
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        Button(
+//            onClick = {
+//                selectedLatLng?.let { onLocationSelected(it) }
+//            },
+//            enabled = selectedLatLng != null,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//        ) {
+//            Text("Confirm Location")
+//        }
+    }
+}
 
 
 

@@ -640,7 +640,7 @@ class RepoImpl(
         }
     }
 
-    override suspend fun getWithdrawalHistory(): Flow<Results<Response<WithdrawalHistoryResponse>>> = flow {
+    override suspend fun getWithdrawalHistory(): Flow<Results<Response<List<WithdrawalHistoryResponse>>>> = flow {
         emit(Results.Loading)
         try {
             val response = apiServices.getWithdrawalHistory()
@@ -699,7 +699,7 @@ class RepoImpl(
     }
 
 
-    override suspend fun getCategoryList(): Flow<Results<Response<CategoryResponse>>> = flow {
+    override suspend fun getCategoryList(): Flow<Results<Response<List<CategoryResponse>>>> = flow {
         emit(Results.Loading)
         try {
             val response = apiServices.getCategoryList()
@@ -713,7 +713,7 @@ class RepoImpl(
         }
     }
 
-    override suspend fun getFacilityList(): Flow<Results<Response<FacilityResponse>>> = flow {
+    override suspend fun getFacilityList(): Flow<Results<Response<List<FacilityResponse>>>> = flow {
         emit(Results.Loading)
         try {
             val response = apiServices.getFacilityList()
