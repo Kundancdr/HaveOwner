@@ -1,12 +1,10 @@
 package com.example.haveneraowner.data.models
 
-import com.example.haveneraowner.data.models.response.CategoryResponse
-import com.example.haveneraowner.data.models.response.FacilityResponse
-import com.example.haveneraowner.data.models.response.OwnerServiceResponse
+import okhttp3.RequestBody
 
 data class CreateOwnerRoomRequest(
     val category: Int,
-    val room_for : Int,
+    val room_for: Int,
     val room_name: String,
     val description: String,
     //val rules: String?,
@@ -19,7 +17,7 @@ data class CreateOwnerRoomRequest(
     val latitude: Double,
     val longitude: Double,
     //val near_by: String?,
-    val address: String?,
+    val address: String,
    // val address_line2: String?,
     val city: String?,
     val state: String?,
@@ -31,7 +29,12 @@ data class CreateOwnerRoomRequest(
     val services: List<Int>,
     val status: String,
     val main_image: String?,
-    val additional_images: List<String>
+    val additional_images: List<String>,
+    val pricePerNight: RequestBody,
+    val roomName: RequestBody,
+    val addressLine2: RequestBody,
+    val roomNo: RequestBody,
+    val nearBy: RequestBody
 )
 
 //data class Categorys(val id: Int, val name: String)

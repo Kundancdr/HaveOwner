@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.haveneraowner.presentation.screens.AddHotelRoomScreen
+import com.example.haveneraowner.presentation.screens.AddRoom
 import com.example.haveneraowner.presentation.screens.BookingsScreen
 import com.example.haveneraowner.presentation.screens.Dashboard
 import com.example.haveneraowner.presentation.screens.DashboardScreen
@@ -47,6 +48,8 @@ sealed class Screen(val route: String) {
     object Booking : Screen("booking")
 
     object Rooms : Screen("rooms")
+
+    object AddRooms : Screen("add_Room")
 
     object Services : Screen("services")
 
@@ -126,7 +129,11 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(Screen.Rooms.route){
-            AddHotelRoomScreen()
+            AddHotelRoomScreen(navController = navController)
+        }
+
+        composable(Screen.AddRooms.route){
+            AddRoom(navController = navController)
         }
 
         composable(Screen.Services.route){

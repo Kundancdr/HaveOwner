@@ -2,7 +2,6 @@ package com.example.haveneraowner.presentation.screens
 
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -79,9 +78,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.haveneraowner.data.models.CreateOwnerRoomRequest
 import com.example.haveneraowner.data.models.Rooms
+import com.example.haveneraowner.presentation.navigation.Screen
 import com.example.haveneraowner.presentation.viewModels.AuthViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
@@ -101,6 +102,7 @@ import java.util.Locale
 
 @Composable
 fun AddHotelRoomScreen(
+    navController: NavController,
     viewModel: AuthViewModel = koinViewModel()
 ) {
 
@@ -139,7 +141,7 @@ fun AddHotelRoomScreen(
             Scaffold(
                 floatingActionButton = {
                     FloatingActionButton(
-                        onClick = { showAddDialog = true },
+                        onClick = { navController.navigate(Screen.AddRooms.route) },
                         containerColor = Color(0xFFE53E3E),
                         contentColor = Color.White
                     ) {
@@ -192,66 +194,66 @@ fun AddHotelRoomScreen(
                 }
 
                 // Add Service Dialog
-                if (showAddDialog) {
-                    RoomDialog(
-                        //room = Rooms,
-                        onDismiss = {
-                            showAddDialog = false
-                        },
-                        onSave = {result ->
-                            viewModel.createOwnerRoom(
-                                CreateOwnerRoomRequest(
-                                    category = result.category,
-                                    room_for = result.room_for,
-                                    room_name = result.room_name,
-                                    description = result.description,
-                                   // rules = result.rules,
-                                    price_per_night = result.price_per_night,
-                                    price_not_per_night = result.price_not_per_night,
-                                    tax = result.tax,
-                                  //  room_type = result.room_type,
-                                    capacity = result.capacity,
-                                    no_of_room = result.no_of_room,
-                                    latitude = result.latitude,
-                                    longitude = result.longitude,
-                                  //  near_by = result.near_by,
-                                    address = result.address,
-                                   // address_line2 = result.address_line2,
-                                    city = result.city,
-                                    state = result.state,
-                                    postal_code = result.postal_code,
-                                    country = result.country,
-                                    available_from = result.available_from,
-                                  //  available_to = result.available_to,
-                                    facilities = result.facilities,
-                                    services = result.services,
-                                    main_image = result.main_image,
-                                    additional_images = result.additional_images,
-                                    status = result.status,
-                                  //  created_at = result.created_at,
-                                )
-                            )
-                        }
-                    )
-
-//                    ServiceDialog(
-//                        title = "Add New Service",
+//                if (showAddDialog) {
+//                    RoomDialog(
+//                        //room = Rooms,
 //                        onDismiss = {
 //                            showAddDialog = false
 //                        },
-//                        onConfirm = { result ->
-//
-//                            viewModel.createOwnerService(
-//                                CreateOwnerServiceRequest(
-//                                    name = result.name,
+//                        onSave = {result ->
+//                            viewModel.createOwnerRoom(
+//                                CreateOwnerRoomRequest(
+//                                    category = result.category,
+//                                    room_for = result.room_for,
+//                                    room_name = result.room_name,
 //                                    description = result.description,
-//                                    price = result.price
+//                                   // rules = result.rules,
+//                                    price_per_night = result.price_per_night,
+//                                    price_not_per_night = result.price_not_per_night,
+//                                    tax = result.tax,
+//                                  //  room_type = result.room_type,
+//                                    capacity = result.capacity,
+//                                    no_of_room = result.no_of_room,
+//                                    latitude = result.latitude,
+//                                    longitude = result.longitude,
+//                                  //  near_by = result.near_by,
+//                                    address = result.address,
+//                                   // address_line2 = result.address_line2,
+//                                    city = result.city,
+//                                    state = result.state,
+//                                    postal_code = result.postal_code,
+//                                    country = result.country,
+//                                    available_from = result.available_from,
+//                                  //  available_to = result.available_to,
+//                                    facilities = result.facilities,
+//                                    services = result.services,
+//                                    main_image = result.main_image,
+//                                    additional_images = result.additional_images,
+//                                    status = result.status,
+//                                  //  created_at = result.created_at,
 //                                )
 //                            )
-//                            showAddDialog = false
 //                        }
 //                    )
-                }
+//
+////                    ServiceDialog(
+////                        title = "Add New Service",
+////                        onDismiss = {
+////                            showAddDialog = false
+////                        },
+////                        onConfirm = { result ->
+////
+////                            viewModel.createOwnerService(
+////                                CreateOwnerServiceRequest(
+////                                    name = result.name,
+////                                    description = result.description,
+////                                    price = result.price
+////                                )
+////                            )
+////                            showAddDialog = false
+////                        }
+////                    )
+//                }
             }
         }
     }
@@ -727,35 +729,35 @@ fun RoomDialog(
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        val roomss = CreateOwnerRoomRequest(
-                            category = selectedCategoryId,
-                            room_for = selectedRoomForId,
-                            room_name = roomName,
-                            description = description,
-                            price_per_night = pricePerNight,
-                            price_not_per_night = priceNotPerNight,
-                            tax = taxPercentage,
-                            capacity = capacity,
-                            no_of_room = numberOfRooms,
-                            latitude = Lattitude,
-                            longitude = Lattitude,
-                            address = fullAddress,
-                            city = city,
-                            state = state,
-                            postal_code = pinCode,
-                            country =country,
-                            available_from = availableFrom.toString(),
-                            facilities = selectedFacilityIds,
-                            services = selectedServicesIds,
-                            main_image = mainImage.toString(),
-                            additional_images =  additionalImages.map { it.toString() },
-                            status = status
-                        )
-                        onSave(roomss)
-                    }) {
-                        Text("Save")
-                    }
+//                    Button(onClick = {
+//                        val roomss = CreateOwnerRoomRequest(
+//                            category = selectedCategoryId,
+//                            room_for = selectedRoomForId,
+//                            room_name = roomName,
+//                            description = description,
+//                            price_per_night = pricePerNight,
+//                            price_not_per_night = priceNotPerNight,
+//                            tax = taxPercentage,
+//                            capacity = capacity,
+//                            no_of_room = numberOfRooms,
+//                            latitude = Lattitude,
+//                            longitude = Lattitude,
+//                            address = fullAddress,
+//                            city = city,
+//                            state = state,
+//                            country =country,
+//                            postal_code = pinCode,
+//                            available_from = availableFrom.toString(),
+//                            facilities = selectedFacilityIds,
+//                            services = selectedServicesIds,
+//                            status = status,
+//                            main_image = mainImage.toString(),
+//                            additional_images =  additionalImages.map { it.toString() },
+//                        )
+//                        onSave(roomss)
+//                    }) {
+//                        Text("Save")
+//                    }
                 }
             }
         }

@@ -75,7 +75,7 @@ fun ServicesScreen(
     val services = serviceData.success?.body()?.results ?: emptyList()
     Log.d("getData", "data $services")
     var showAddDialog by remember { mutableStateOf(false) }
-     var editingService by remember { mutableStateOf<ResultItem?>(null) }
+    var editingService by remember { mutableStateOf<ResultItem?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.getOwnerService()
@@ -151,16 +151,13 @@ fun ServicesScreen(
                                 ServiceCard(
                                     service = service,
                                     onEdit = {
-                                        viewModel.updateOwnerService(
-                                            service.id,
-                                            UpdateOwnerServiceRequest(
-                                                name = service.name,
-                                                description = service.description,
-                                                price = service.price.length
-                                            )
-                                        )
+                                        editingService = service
                                     },
-                                    onDelete = { viewModel.deleteOwnerService(service.id) }
+                                    onDelete = {
+                                        viewModel.deleteOwnerService(service.id)
+                                        // refresh list after delete
+                                        viewModel.getOwnerService()
+                                    }
                                 )
                             }
                         }
@@ -184,6 +181,8 @@ fun ServicesScreen(
                                 )
                             )
                             showAddDialog = false
+                            // refresh list after add
+                            viewModel.getOwnerService()
                             //  viewModel.createOwnerService(newService)
                             //  showAddDialog = false
 
@@ -200,19 +199,26 @@ fun ServicesScreen(
                 }
 
                 // Edit Service Dialog
-//        editingService?.let { service ->
-//            ServiceDialog(
-//                title = "Edit Service",
-//                service = service,
-//                onDismiss = { editingService = null },
-//                onConfirm = { updatedService ->
-////                    services = services.map { if (it.id == updatedService.id) updatedService else it }
-////                    editingService = null
-//                    viewModel.updateOwnerService(updatedService)
-//                    editingService = null
-//                }
-//            )
-//        }
+                editingService?.let { service ->
+                    ServiceDialog(
+                        title = "Edit Service",
+                        service = service,
+                        onDismiss = { editingService = null },
+                        onConfirm = { updated ->
+                            viewModel.updateOwnerService(
+                                serviceId = service.id,
+                                request = UpdateOwnerServiceRequest(
+                                    name = updated.name,
+                                    description = updated.description,
+                                    price = updated.price
+                                )
+                            )
+                            editingService = null
+                            // refresh list after edit
+                            viewModel.getOwnerService()
+                        }
+                    )
+                }
             }
         }
     }

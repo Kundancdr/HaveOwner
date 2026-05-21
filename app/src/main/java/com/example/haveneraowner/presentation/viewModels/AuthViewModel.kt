@@ -1083,13 +1083,13 @@ data class OwnerServiceByIdState(
 
 data class OwnerRoomState(
     val isLoading: Boolean = false,
-    val success: Response<OwnerRoomResponse>? = null,
+    var success: Response<OwnerRoomResponse>? = null,
     val error: String? = null
 )
 
 data class CreateOwnerRoomState(
     val isLoading: Boolean = false,
-    val success: Response<CreateOwnerRoomResponse>? = null,
+    var success: Response<CreateOwnerRoomResponse>? = null,
     val error: String? = null
 )
 
