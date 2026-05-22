@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.haveneraowner"
+    namespace = "com.swastik.haveneraowner"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.haveneraowner"
+        applicationId = "com.swastik.haveneraowner"
         minSdk = 26
         targetSdk = 35
         versionCode = 2
